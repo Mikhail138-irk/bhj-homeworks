@@ -1,57 +1,48 @@
-const signin = document.getElementById('signin');
-const signinForm = document.getElementById('signin__form');
-const signinButton = document.getElementById('signin__btn');
-const signoutButton = document.getElementById('signoff__btn');
+const form = document.getElementById('signin__form');
 const welcome = document.getElementById('welcome');
-const idUser = document.getElementById('user_id');
+const signin = document.getElementById('signin');
+const logoutBtn = document.getElementById('logout__btn');
 
-function postRequestOnSignin() {
-  const xhr = new XMLHttpRequest();
-  const formData = new FormData(document.getElementById('signin__form'));
+// Событие изменения в форме авторизации и отправка запроса на сервер
+form.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-  xhr.open('POST', 'https://students.netoservices.ru/nestjs-backend/auth');
-  xhr.responseType = 'json';
+    const formData = new FormData(form);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://students.netoservices.ru/nestjs-backend/auth');
+    xhr.responseType = 'json';
+    xhr.onload = function() {
+        if(xhr.response.success) {
+            const userId = xhr.response.user_id;
+            localStorage.setItem('userId', userId);
+            logoutBtn.classList.add('logout__btn_active');
+            welcomeDude(userId);
+        } else {
+            alert('Неверный логин или пароль');
+        }
+    }        
+    xhr.send(formData);
+    form.reset();
+});
 
-  xhr.onload = () => {
-    if (xhr.status >= 200 && xhr.status < 300) {
-
-      if (xhr.response.success) {
-        localStorage.setItem('idUser', xhr.response.user_id);
-        signin.classList.remove('signin_active');
-        welcome.classList.add('welcome_active');
-        idUser.textContent = xhr.response.user_id;
-      } else {
-        alert('Неверный логин/пароль');
-      }
-      
-    } else {
-      alert('Необходимо заполнить оба поля');
+window.addEventListener('DOMContentLoaded', () => {
+    const userId = localStorage.getItem('userId');
+    if(userId) {
+        welcomeDude(userId);
     }
-  };
+});
 
-  xhr.send(formData);
-}
-
-function signinAndSignoutActions() {
-  if (localStorage.getItem('idUser')) {
-    welcome.classList.add('welcome_active');
-    idUser.textContent = localStorage.getItem('idUser');
-  } else {
+// Событие клика на кнопку Выйти
+logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('userId');
     signin.classList.add('signin_active');
-  }
-
-  signinButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    postRequestOnSignin();
-    signinForm.reset();
-  });
-
-  signoutButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    localStorage.removeItem('idUser');
     welcome.classList.remove('welcome_active');
-    signin.classList.add('signin_active');
-  });
-}
+    logoutBtn.classList.remove('logout__btn_active')    
+})
 
-signinAndSignoutActions();
+// Функция приветствия пользователя 
+function welcomeDude(userId) {
+    signin.classList.remove('signin_active');
+    welcome.classList.add('welcome_active');
+    welcome.querySelector('#user_id').textContent = userId;
+}
