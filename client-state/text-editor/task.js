@@ -1,19 +1,25 @@
-const storedText = localStorage.getItem('text');
-const textEditor = document.getElementById('editor');
+"use strict";
 
-// Загрузка текста из localStorage
-if(storedText !== null) {
-    textEditor.value = storedText;
-}
+document.addEventListener("DOMContentLoaded", () => {
+    
+	const editor = document.getElementById("editor");
+	const resetButton = document.getElementById("resetButton");
 
-// Редактирование текста 
-textEditor.addEventListener('input', () => {
-    localStorage.setItem('text', textEditor.value);
-})
+    // есть ли сохраненный текст в localStorage
+    const savedText = localStorage.getItem("editorText");
 
-// Кнопка удаления текста
-const removeBtn = document.getElementById('remove_btn');
-removeBtn.addEventListener('click', () => {
-    textEditor.value = '';
-    localStorage.removeItem('text');
-})
+    // обр.соб. изменения текста в редакторе
+    editor.addEventListener("input", () => {
+        // получаем текущий текст из редактора
+        const currentText = editor.value;
+        // сохраняем текст в localStorage
+        localStorage.setItem("editorText", currentText);
+	});
+	// "Сбросить"
+    resetButton.addEventListener("click", () => {
+        // очищаем текстовый редактор
+        editor.value = "";
+        // удаляем сохраненный текст из localStorage
+        localStorage.removeItem("editorText");
+    });
+});
